@@ -1,12 +1,7 @@
-import { getAuth, signInWithEmailAndPassword, type User } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-
-const auth = getAuth();
-
-type AuthResponse = {
-  user: User | null;
-  error: FirebaseError | null;
-};
+import { auth } from "../../config";
+import type { AuthResponse } from "../../types";
 
 // Вход по email и паролю
 export const loginWithEmail = async (
@@ -14,7 +9,11 @@ export const loginWithEmail = async (
   password: string
 ): Promise<AuthResponse> => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return { user: userCredential.user, error: null };
   } catch (error) {
     return { user: null, error: error as FirebaseError };

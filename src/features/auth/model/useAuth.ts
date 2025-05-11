@@ -1,16 +1,39 @@
+import { setIsLoggedInAC } from '@/app/app-slice';
+import { useAppDispatch } from '@/common/hooks';
 import { auth } from '@/shared/api/firebase/config';
-import type { User } from 'firebase/auth';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { handleAuthErrors } from '@/utils';
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { useCallback, useState } from 'react';
 
 
-type UseAuthResult = {
-    user: User | null | undefined
-    isLoading: boolean
-    error: Error | undefined
-}
+export const useAuth = () => {
+  const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
-export const useAuth = (): UseAuthResult => {
-  const [user, isLoading, error] = useAuthState(auth);
+  const handleAuth = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      
+      if (methods.length > 0) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+      
+      dispatch(setIsLoggedInAC({ isLoggedIn: true }));
+      return { success: true, error: null};
+    } catch (error) {
+      // Обрабатываем только специфичные ошибки Firebase
+      if (error instanceof Error && 'code' in error) {
+        const message = handleAuthErrors(error);
+        return { success: false, error: message };
+      }
+      return { success: false, error: 'Неизвестная ошибка' };
+    } finally {
+      setIsLoading(false); // Сбрасываем состояние загрузки в любом случае
+    }
+  }, [dispatch]);
 
-  return { user, isLoading, error };
+  return { handleAuth, isLoading };
 };

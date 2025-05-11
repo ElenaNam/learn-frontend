@@ -1,10 +1,8 @@
 import { db, auth } from "./config";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from "firebase/auth";
-import { FirebaseError } from "firebase/app";
 
 // Проверка Firestore
 export const testFirestore = async () => {
@@ -34,12 +32,9 @@ export const testAuth = async (): Promise<void> => {
           email: email,
           createdAt: new Date()
         });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Ошибка:", error.code, error.message);
       }
 
 };
-
-// Запустите проверки
-//testFirestore();
-//testAuth();

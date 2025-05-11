@@ -1,26 +1,69 @@
-import { setIsLoggedInAC } from "@/app/app-slice";
-import { useAppDispatch } from "@/common/hooks";
-import { useAuth } from "@/features/auth/model/useAuth";
-import { loginWithEmail, logout } from "../../api";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { useState } from "react";
+
+import Grid from "@mui/material/Grid";
+import { useAuth } from "../../model/useAuth";
 
 export const Login = () => {
-  const { user } = useAuth();
-  const dispatch = useAppDispatch()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleClick = () => {
-    //console.log(user);
-    if(user) {
-      logout()
-      dispatch(setIsLoggedInAC({isLoggedIn: false}))
-    } else {
-      loginWithEmail('email', 'password')
-      dispatch(setIsLoggedInAC({isLoggedIn: true}))
-    }
+  const { handleAuth } = useAuth();
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("handleSubmit");
+    handleAuth(email, password);
   };
+
   return (
-    <div>
-      <button onClick={handleClick}>{user ? "Выйти" : "Войти"}</button>
-    </div>
+    <Grid
+      container
+      sx={{
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
+        <Typography variant="h5" component="h1" align="center" gutterBottom>
+          Вход
+        </Typography>
+        <form onSubmit={onSubmit}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            //error={!!errors.email}
+            //helperText={errors.email}
+          />
+          <TextField
+            label="Пароль"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            //error={!!errors.password}
+            //helperText={errors.password}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Войти
+          </Button>
+        </form>
+      </Paper>
+    </Grid>
   );
 };

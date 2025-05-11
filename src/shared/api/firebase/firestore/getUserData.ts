@@ -1,6 +1,6 @@
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config";
 
-const db = getFirestore();
 
 // Чтение данных пользователя
 export const getUserData = async (userId: string) => {
