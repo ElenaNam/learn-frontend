@@ -1,39 +1,49 @@
 import { setIsLoggedInAC } from '@/app/app-slice';
 import { useAppDispatch } from '@/common/hooks';
-import { auth } from '@/shared/api/firebase/config';
+import { createUser, loginWithEmail } from '@/shared/api/firebase';
 import { handleAuthErrors } from '@/utils';
-import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from 'firebase/auth';
-import { useCallback, useState } from 'react';
-
+import {  useState } from 'react';
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAuth = useCallback(async (email: string, password: string) => {
+  const handleAuth = async (email: string, password: string) => {
     setIsLoading(true);
+    
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
+      // 1. Пробуем войти
+      const loginResponse = await loginWithEmail(email, password);
       
-      if (methods.length > 0) {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+      if (loginResponse.user) {
+        dispatch(setIsLoggedInAC({ isLoggedIn: true }));
+        return { success: true, error: null };
       }
-      
-      dispatch(setIsLoggedInAC({ isLoggedIn: true }));
-      return { success: true, error: null};
-    } catch (error) {
-      // Обрабатываем только специфичные ошибки Firebase
-      if (error instanceof Error && 'code' in error) {
-        const message = handleAuthErrors(error);
-        return { success: false, error: message };
+
+      // 2. Если пользователь не найден - регистрируем
+      if (loginResponse.error?.code === 'auth/user-not-found') {
+        const registerResponse = await createUser(email, password);
+        
+        if (registerResponse.user) {
+          dispatch(setIsLoggedInAC({ isLoggedIn: true }));
+          return { success: true, error: null };
+        }
+        
+        return { 
+          success: false, 
+          error: registerResponse.error ? handleAuthErrors(registerResponse.error) : 'Ошибка регистрации' 
+        };
       }
-      return { success: false, error: 'Неизвестная ошибка' };
+
+      // 3. Обрабатываем другие ошибки входа
+      return {
+        success: false,
+        error: loginResponse.error ? handleAuthErrors(loginResponse.error) : 'Ошибка входа'
+      };
     } finally {
-      setIsLoading(false); // Сбрасываем состояние загрузки в любом случае
+      setIsLoading(false);
     }
-  }, [dispatch]);
+  };
 
   return { handleAuth, isLoading };
 };

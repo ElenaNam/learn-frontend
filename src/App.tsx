@@ -24,6 +24,7 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
     getCurrentUser().then((user) => {
+      //console.log(user)
       if (user) dispatch(setIsLoggedInAC({ isLoggedIn: true }));
       setIsInitialized(true);
       //testFirestore()

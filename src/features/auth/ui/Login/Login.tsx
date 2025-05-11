@@ -14,10 +14,15 @@ export const Login = () => {
 
   const { handleAuth } = useAuth();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("handleSubmit");
-    handleAuth(email, password);
+    const { success, error } = await handleAuth(email, password);
+
+    if (!success) {
+      console.log(error)
+      alert(error); // Или вывод в UI компонент
+    }
   };
 
   return (

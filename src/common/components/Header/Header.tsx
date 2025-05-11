@@ -36,7 +36,7 @@ export const Header = () => {
             <MenuIcon />
           </IconButton> */}
           <div>
-            {isLoggedIn && <Button variant="contained" onClick={logoutHandler}>Sign out</Button>}
+            {isLoggedIn && <Button variant="contained" onClick={logoutHandler}>Log out</Button>}
           </div>
         </Container>
       </Toolbar>

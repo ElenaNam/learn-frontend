@@ -7,5 +7,6 @@ export const AUTH_ERRORS: Record<string, string> = {
   "auth/weak-password": "Пароль должен содержать минимум 6 символов",
   "auth/operation-not-allowed": "Операция не разрешена",
   "auth/network-request-failed": "Ошибка сети",
-  "auth/invalid-credential": "",
+  //"auth/invalid-credential": "",
+  //"auth/invalid-login-credentials": "Неверный email или пароль",
 } as const;
