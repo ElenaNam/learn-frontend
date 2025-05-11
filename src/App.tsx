@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { Routing } from "./common/routing";
+//import { testAuth, testFirestore } from './shared/api/firebase/test-connection'
+import { getCurrentUser } from "./features/auth/api/getCurrentUser";
+import { useAppDispatch } from "./common/hooks";
+import { setIsLoggedInAC } from "./app/app-slice";
+import CircularProgress from "@mui/material/CircularProgress";
+import styles from "./App.module.css";
+import { useAuth } from "./features/auth/model/useAuth";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { isLoading } = useAuth();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (isLoading) return
+    getCurrentUser().then((user) => {
+      if (user) dispatch(setIsLoggedInAC({ isLoggedIn: true }));
+      setIsInitialized(true);
+      //testFirestore()
+      //testAuth();
+    });
+  }, [dispatch, isLoading]);
+
+  if (!isInitialized) {
+    return (
+      <div className={styles.circularProgressContainer}>
+        <CircularProgress size={150} thickness={3} />
+      </div>
+    );
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Routing />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
